@@ -1,1 +1,103 @@
-mystery_files_create_and_share
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mystery Files — Create & Share</title>
+<style>
+:root{--lav:#b99be8;--deep:#684b91;--ink:#443653;--paper:#fffaff;--pink:#f5dff0}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;padding:18px;background:linear-gradient(135deg,#f4eaff,#fff0f7 55%,#e9e0ff);font-family:Georgia,serif;color:var(--ink)}
+main{max-width:680px;margin:24px auto;background:#ffffffeb;border:1px solid white;border-radius:26px;padding:clamp(20px,5vw,36px);box-shadow:0 18px 55px #76559a24}
+.kicker{text-align:center;text-transform:uppercase;letter-spacing:2.5px;font:700 10px Arial;color:#9477b5}
+h1{text-align:center;color:#654987;font-size:clamp(30px,7vw,42px);margin:12px 0}
+.sub{text-align:center;color:#816d92;line-height:1.5}
+button,.btn{border:0;border-radius:13px;padding:13px 17px;font:600 14px Arial;cursor:pointer}
+.primary{background:linear-gradient(135deg,#a987d8,#8060b3);color:white}
+.secondary{background:#f4edfb;color:#684b91;border:1px solid #e5d8f1}
+button:disabled{opacity:.5;cursor:not-allowed}
+.center{text-align:center}.hidden{display:none!important}
+.actions{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:20px}
+.panel{background:#fffaff;border:1px solid #eee2f5;border-radius:18px;padding:17px;margin:14px 0}
+label{display:block;font:700 12px Arial;color:#866ba3;margin:12px 0 6px}
+input,textarea,select{width:100%;border:1px solid #e4d8ee;border-radius:12px;padding:12px;font:15px Arial;color:var(--ink);background:white}
+textarea{min-height:70px;resize:vertical}
+.meta{display:flex;justify-content:space-between;font:700 11px Arial;letter-spacing:1px;color:#987fb0}
+.progress{height:7px;background:#eee5f6;border-radius:99px;overflow:hidden;margin:14px 0 22px}.bar{height:100%;background:linear-gradient(90deg,#c5a7eb,#e5b9dc);width:0}
+.question{font-size:24px;line-height:1.3;color:#59406f}
+.option{display:block;width:100%;text-align:left;margin:9px 0;background:#fbf7ff;border:1px solid #e8dcf5;color:#5e4a72}
+.option.correct{background:#edf8ef;border-color:#9bc9a3}.option.wrong{background:#fff0f2;border-color:#e5a6b1}
+.option img,.preview img{display:block;width:100%;max-height:170px;object-fit:cover;border-radius:10px;margin-bottom:8px}
+.small{font:12px Arial;color:#9a88a9;line-height:1.5}
+.qrow{border-top:1px solid #eee4f4;padding-top:12px;margin-top:12px}
+.answerrow{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;margin:8px 0}
+.answerrow input[type=radio]{width:auto}
+.score{font-size:54px;color:#7959a3;margin:12px 0}.rank{font-size:21px;color:#684b91}
+hr{border:0;border-top:1px solid #eee4f4;margin:22px 0}
+</style></head>
+<body><main>
+<section id="home">
+<div class="kicker">A little game of clues & secrets</div><h1 id="homeTitle">Estelle's<br>Mystery Files</h1>
+<p class="sub" id="homeDesc">Think you know Estelle? Solve the case, earn your detective rank, then create a mystery of your own.</p>
+<div class="center"><p class="small">Play a mystery • Make your own • Share it with friends</p></div>
+<div class="actions"><button class="primary" id="playBtn">Open the case ✦</button><button class="secondary" id="makeBtn">Create your own game</button></div>
+</section>
+<section id="game" class="hidden">
+<div class="meta"><span id="caseNo"></span><span id="scoreLabel">0 POINTS</span></div><div class="progress"><div class="bar" id="bar"></div></div>
+<div class="kicker">Examine the evidence</div><h2 class="question" id="question"></h2><div id="options"></div><p class="center small" id="feedback"></p>
+<div class="actions"><button class="primary hidden" id="nextBtn">Next clue →</button></div>
+</section>
+<section id="result" class="hidden center">
+<div class="kicker">Case closed</div><h1>Investigation complete ✦</h1><div class="score" id="finalScore"></div><div class="rank" id="rank"></div><p class="sub" id="message"></p>
+<div class="actions"><button class="primary" id="againBtn">Play again</button><button class="secondary" id="createAfterBtn">Create your own game</button><button class="secondary" id="shareBtn">Share this game</button></div>
+</section>
+<section id="builder" class="hidden">
+<div class="kicker">Your turn to make the mystery</div><h1>Create a game</h1><p class="sub">No account needed. Add your questions, choose the correct answers, then create a link to share.</p>
+<div class="panel">
+<label>GAME TITLE</label><input id="gameTitle" maxlength="65" placeholder="e.g. How well do you know me?">
+<label>INTRODUCTION</label><textarea id="gameIntro" placeholder="A short message for your players"></textarea>
+<div id="questionEditor"></div>
+<div class="actions"><button class="secondary" id="addQuestion">+ Add a question</button></div>
+</div>
+<div class="actions"><button class="primary" id="makeLink">Create share link ✦</button><button class="secondary" id="cancelBuilder">Back</button></div>
+<div id="sharePanel" class="panel hidden"><b>Your game link is ready!</b><p class="small">Copy this link and send it through WhatsApp. Your friends can play without signing in.</p><textarea id="shareUrl" readonly></textarea><div class="actions"><button class="primary" id="copyLink">Copy link</button><button class="secondary" id="whatsapp">Share on WhatsApp</button></div><p class="small">The link contains the game you created. Keep it somewhere safe so you can share it again.</p></div>
+</section>
+</main>
+<script>
+const starter=[
+{q:"What is Estelle's favourite ice cream flavour?",a:["Chocolate","Strawberry","Plain vanilla","Cookies and cream"],c:2},
+{q:"What is Estelle's favourite colour?",a:["Purple","Green","Pink","Blue"],c:0},
+{q:"Which song is Estelle's favourite?",a:["Summertime Sadness","Say Yes to Heaven","Video Games","Young and Beautiful"],c:1},
+{q:"What is Estelle's favourite hobby?",a:["Painting","Singing","Dancing","Reading"],c:1},
+{q:"Which city is Estelle's dream city?",a:["London","Seoul","Sydney","Paris"],c:2},
+{q:"Which little creature does Estelle love?",a:["Ladybugs","Butterflies","Dragonflies","Bees"],c:1},
+{q:"What is Estelle's favourite movie?",a:["The Notebook","Titanic","Pride & Prejudice","Me Before You"],c:0},
+{q:"What comes first in Estelle's life?",a:["Popularity","Romance","Faith","Money"],c:2},
+{q:"What would Estelle most likely choose on a rainy day?",a:["A long walk","Going shopping","Sleeping","Watching a match"],c:2},
+{q:"If she had to choose, what would Estelle choose?",a:["Love over God","God over love","Fame over both","Neither"],c:1},
+{q:"Which instrument does Estelle play?",a:["Guitar","Violin","Piano","Drums"],c:2},
+{q:"What does Estelle love about herself?",a:["Her dimples","Her gap tooth","Her handwriting","Her height"],c:1},
+{q:"What does Estelle tend to do in almost any situation?",a:["Cry","Get angry","Laugh","Stay completely silent"],c:2},
+{q:"Which historical era is Estelle's favourite?",a:["Victorian","Renaissance","Medieval","Ancient Egyptian"],c:2},
+{q:"Who is Estelle's role model?",a:["Princess Diana","Queen Elizabeth I","Audrey Hepburn","Mother Teresa"],c:0},
+{q:"Which sweet treat does Estelle love?",a:["Marshmallows","Gummy bears","Lollipops","Jelly beans"],c:1},
+{q:"Which two hobbies has Estelle also mentioned enjoying?",a:["Painting and singing","Running and swimming","Cooking and skating","Gaming and cycling"],c:0},
+{q:"Which colour combination is part of Estelle's favourite aesthetic?",a:["Orange and black","Lavender and lilac","Red and yellow","Brown and beige"],c:1},
+{q:"What kind of atmosphere does Estelle love?",a:["Medieval, royal and ethereal","Futuristic and industrial","Sporty and neon","Tropical and beachy"],c:0},
+{q:"What is the name of Estelle's beauty business?",a:["Stelláh Beauty","Star Beauty Bar","Estelle's Spa","Purple Palace"],c:0}
+];
+let quiz=starter.map(x=>({...x})),idx=0,score=0,locked=false,editors=[];
+const $=id=>document.getElementById(id);
+function show(id){["home","game","result","builder"].forEach(x=>$(x).classList.toggle("hidden",x!==id))}
+function encode(obj){const bytes=new TextEncoder().encode(JSON.stringify(obj));let bin="";bytes.forEach(b=>bin+=String.fromCharCode(b));return btoa(bin).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"")}
+function decode(s){let bin=atob(s.replace(/-/g,"+").replace(/_/g,"/"));let bytes=Uint8Array.from(bin,c=>c.charCodeAt(0));return JSON.parse(new TextDecoder().decode(bytes))}
+function init(){let hash=location.hash.slice(1);if(hash){try{let data=decode(hash);if(data.title&&Array.isArray(data.questions)&&data.questions.length){quiz=data.questions; $("homeTitle").textContent=data.title;$("homeDesc").textContent=data.intro||"A mystery made just for you. Can you solve it?";$("playBtn").textContent="Play this mystery ✦";}}catch(e){}}}
+function start(){idx=0;score=0;show("game");render()}
+function render(){locked=false;let item=quiz[idx];$("caseNo").textContent=`CLUE ${String(idx+1).padStart(2,"0")} / ${quiz.length}`;$("scoreLabel").textContent=score+" POINTS";$("bar").style.width=(idx/quiz.length*100)+"%";$("question").textContent=item.q;$("feedback").textContent="";$("nextBtn").classList.add("hidden");$("options").innerHTML="";
+item.a.forEach((a,i)=>{let b=document.createElement("button");b.className="option";b.textContent=String.fromCharCode(65+i)+".  "+a;b.onclick=()=>choose(i);$("options").appendChild(b)})}
+function choose(n){if(locked)return;locked=true;let correct=quiz[idx].c;[...$("options").children].forEach((b,i)=>{b.disabled=true;if(i===correct)b.classList.add("correct");else if(i===n)b.classList.add("wrong")});if(n===correct){score++;$("feedback").textContent="Correct! A brilliant detective. ✨"}else $("feedback").textContent="Not quite! The evidence points elsewhere."; $("scoreLabel").textContent=score+" POINTS";$("nextBtn").textContent=idx===quiz.length-1?"Reveal your rank →":"Next clue →";$("nextBtn").classList.remove("hidden")}
+function next(){idx++;if(idx<quiz.length)render();else finish()}
+function finish(){show("result");$("bar").style.width="100%";$("finalScore").textContent=score+"/"+quiz.length;let pct=score/quiz.length; $("rank").textContent=pct>=.9?"Master Detective 🕵️‍♀️":pct>=.65?"Senior Investigator ✨":pct>=.35?"Curious Detective 🔎":"Rookie Investigator 💌";$("message").textContent=pct>=.9?"Every clue solved. Exceptional work!":pct>=.65?"Impressive work. You know your clues!":"A few clues slipped past you. Try again!"}
+function builder(){show("builder");$("sharePanel").classList.add("hidden");$("gameTitle").value="";$("gameIntro").value="";$("questionEditor").innerHTML="";editors=[];addQ();addQ()}
+function addQ(){let n=editors.length;let wrap=document.createElement("div");wrap.className="qrow";wrap.innerHTML=`<label>QUESTION ${n+1}</label><input class="qtext" placeholder="Write your question"><label>ANSWER OPTIONS</label><div class="answers"></div><label>Correct answer</label><select class="correct"><option value="0">Answer A</option><option value="1">Answer B</option><option value="2">Answer C</option><option value="3">Answer D</option></select>`;let answers=wrap.querySelector(".answers");["A","B","C","D"].forEach((letter,i)=>{let row=document.createElement("div");row.className="answerrow";row.innerHTML=`<span>${letter}</span><input class="atext" placeholder="Answer ${letter}">`;answers.appendChild(row)});$("questionEditor").appendChild(wrap);editors.push(wrap)}
+function createLink(){let title=$("gameTitle").value.trim(),intro=$("gameIntro").value.trim();let questions=[];for(let el of editors){let q=el.querySelector(".qtext").value.trim(),a=[...el.querySelectorAll(".atext")].map(x=>x.value.trim()),c=Number(el.querySelector(".correct").value);if(!q||a.some(x=>!x)){alert("Please complete each question and all four answers.");return}questions.push({q,a,c})}if(!title){alert("Please give your game a title.");return}let url=location.href.split("#")[0]+"#"+encode({title,intro,questions});$("shareUrl").value=url;$("sharePanel").classList.remove("hidden")}
+$("playBtn").onclick=start;$("makeBtn").onclick=builder;$("nextBtn").onclick=next;$("againBtn").onclick=start;$("createAfterBtn").onclick=builder;$("shareBtn").onclick=()=>{let url=location.href;if(navigator.share)navigator.share({title:document.title,url});else{navigator.clipboard?.writeText(url);alert("Game link copied if clipboard access is available.")}};$("addQuestion").onclick=addQ;$("makeLink").onclick=createLink;$("cancelBuilder").onclick=()=>show("home");$("copyLink").onclick=async()=>{try{await navigator.clipboard.writeText($("shareUrl").value);$("copyLink").textContent="Copied!";}catch(e){$("shareUrl").select();alert("Select and copy the link.")}};$("whatsapp").onclick=()=>window.open("https://wa.me/?text="+encodeURIComponent("Play my mystery game: "+$("shareUrl").value),"_blank");$("shareUrl").addEventListener("click",e=>e.target.select());init();
+</script></body></html>
